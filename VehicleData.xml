@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/6.0.0/rti_dds_profiles.xsd" 
+     version="6.0.0">
+	 
+    <qos_library name="QosLibrary">
+        <qos_profile name="DefaultProfile"
+                     base_name="BuiltinQosLib::Generic.StrictReliable"
+                     is_default_qos="true">
+            <participant_qos>
+                <participant_name>
+                    <name>Vehicle Data Example</name>
+                </participant_name>
+            </participant_qos>
+        </qos_profile>
+    </qos_library>
+	
+  <types>
+        <struct name="VehicleData" extensibility="extensible">
+            <member name ="vehicleID" type="long"/>
+            <member name="licensePlate" stringMaxLength="128" type="string" key="true"/>
+            <member name="speed" type="long"/>
+            <member name="type" stringMaxLength="128" type="string"/>
+        </struct>
+  </types>
+  
+   <domain_library name="MyDomainLibrary">
+        <domain name="MyDomain" domain_id="0">
+            <register_type name="VehicleData" type_ref="VehicleData" />
+            <topic name="VehicleDataTopic" register_type_ref="VehicleData"/>
+        </domain>
+    </domain_library>
+	
+	 <domain_participant_library name="MyParticipantLibrary">
+        <!-- You can also define the reader and writer inside the same
+            connector instance if you plan to use both in the same application.
+        -->
+        <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
+            <publisher name="MyPublisher">
+                <data_writer name="MyVehicleDataWriter" topic_ref="VehicleDataTopic" />
+            </publisher>
+            <subscriber name="MySubscriber">
+                <!-- Uncomment this if you don't want the Input to start receiving
+                    data before you call Connector.get_input()
+                -->
+                <!--
+                <subscriber_qos>
+                    <entity_factory>
+                        <autoenable_created_entities>false</autoenable_created_entities>
+                    </entity_factory>
+                </subscriber_qos>
+                -->
+                <data_reader name="MyVehicleDataReader" topic_ref="VehicleDataTopic" />
+            </subscriber>
+        </domain_participant>
+    </domain_participant_library>
+	</dds>
